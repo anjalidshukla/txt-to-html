@@ -61,17 +61,40 @@ def html_escape(text):
 
 
 def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
-    # Theme CSS variables
+
+    # Bootswatch/Bootstrap themes
+    bootswatch_themes = [
+        {"name": "Bootstrap Default", "cdn": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"},
+        {"name": "Cerulean", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/cerulean/bootstrap.min.css"},
+        {"name": "Darkly", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css"},
+        {"name": "Flatly", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/flatly/bootstrap.min.css"},
+        {"name": "Lux", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css"},
+        {"name": "Morph", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/morph/bootstrap.min.css"},
+        {"name": "Quartz", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/quartz/bootstrap.min.css"},
+        {"name": "Sketchy", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/sketchy/bootstrap.min.css"},
+        {"name": "Solar", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/solar/bootstrap.min.css"},
+        {"name": "Superhero", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/superhero/bootstrap.min.css"},
+    ]
+
+    # Toodle theme CSS
     theme_vars = "".join([
         f".theme-{i} {{\n" + "\n".join([f"  {k}: {v};" for k, v in t['vars'].items()]) + "\n}}\n"
         for i, t in enumerate(THEMES)
     ])
-    # TOODLE THEME section
+
+    # Toodle theme buttons
     theme_buttons = '<div class="toodle-theme-section"><button class="theme-toggle-main" disabled>TOODLE THEME</button>'
     theme_buttons += "".join([
         f'<button class="theme-toggle" onclick="setTheme({i})">{t["name"]}</button>' for i, t in enumerate(THEMES)
     ])
     theme_buttons += '</div>'
+
+    # Bootswatch theme buttons
+    bootswatch_buttons = '<div class="bootswatch-theme-section"><button class="theme-toggle-main" disabled>BOOTSWATCH</button>'
+    bootswatch_buttons += "".join([
+        f'<button class="theme-toggle" onclick="setBootswatchTheme({i})">{t["name"]}</button>' for i, t in enumerate(bootswatch_themes)
+    ])
+    bootswatch_buttons += '</div>'
 
     # Topic Name button with file links
     import glob
@@ -82,6 +105,7 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         htmlfile = 'HTML/' + fname.replace('.txt', '.html')
         topic_buttons += f'<a class="topic-file-link" href="../{htmlfile}" target="_blank">{fname.replace('.txt','')}</a>'
     topic_buttons += '</div>'
+
     html = f'''<!DOCTYPE html>
 <html>
 <head>
@@ -90,7 +114,7 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Quicksand:wght@700&family=Share+Tech+Mono&family=Montserrat:wght@700&family=Cinzel:wght@700&family=Baloo+2:wght@700&family=Maven+Pro:wght@700&family=Fredoka:wght@700&family=Dancing+Script:wght@700&family=Poppins:wght@700&family=Satisfy&family=Titillium+Web:wght@700&display=swap" rel="stylesheet">
-    <style>
+    <style id="toodle-theme-style">
         :root {{ --bg-color: #1a1a40; --text-color: #f8f8ff; --primary-color: #ff00cc; --secondary-color: #00fff0; --card-bg: #23235b; --font-family: 'Orbitron', 'Inter', sans-serif; }}
         {theme_vars}
         body {{ background: var(--bg-color); color: var(--text-color); font-family: var(--font-family, 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif); min-height: 100vh; margin: 0; padding: 16px; transition: all 0.3s; }}
@@ -99,7 +123,7 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         .meta-info {{ background: var(--card-bg); border-radius: 10px; padding: 14px; margin: 8px auto 20px auto; max-width: 380px; text-align: center; font-size: 1rem; font-weight: 600; }}
         .total-links {{ font-weight: 700; font-size: 1.1rem; }}
         .controls {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 25px; }}
-        .toodle-theme-section {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }}
+        .toodle-theme-section, .bootswatch-theme-section {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }}
         .theme-toggle-main {{ background: #fff; color: #232526; font-weight: 900; border: 2px solid #ff00cc; border-radius: 8px; padding: 10px 22px; font-size: 1.1rem; margin-right: 10px; letter-spacing: 2px; cursor: default; }}
         .theme-toggle {{ padding: 10px 20px; background: var(--primary-color); border: none; border-radius: 8px; cursor: pointer; color: var(--text-color); font-size: 0.95rem; font-weight: 600; margin: 2px; font-family: var(--font-family, 'Inter', sans-serif); }}
         .theme-toggle:active {{ transform: scale(0.97); }}
@@ -115,6 +139,7 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         .video-title {{ color: #ff3d71; }}
         .topic-title {{ color: var(--secondary-color); }}
     </style>
+    <link id="bootswatch-theme-link" rel="stylesheet" href="" disabled>
 </head>
 <body class="theme-0">
 <h1>{html_escape(batch_name)}</h1>
@@ -127,7 +152,7 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         <i class="fas fa-link"></i> Total links: {total_links}
     </div>
 </div>
-<div class="controls">{theme_buttons}</div>
+<div class="controls">{theme_buttons}{bootswatch_buttons}</div>
 {topic_buttons}
 <h2>Topics & Links</h2>
 <ul>
@@ -142,13 +167,43 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         {''.join([f'<li><span class="video-title">{html_escape(v["title"])}:</span> <a href="{v["url"]}" target="_blank">🎬 Video</a></li>' for v in videos])}
 </ul>
 <script>
+// Toodle theme logic
 let currentTheme = 0;
 function setTheme(idx) {{
+    /* Remove Bootswatch theme if active */
+    const bootswatchLink = document.getElementById('bootswatch-theme-link');
+    bootswatchLink.setAttribute('disabled', '');
+    bootswatchLink.href = '';
+    document.getElementById('toodle-theme-style').removeAttribute('disabled');
     document.body.className = 'theme-' + idx;
-    // Set font family for each theme
+    /* Set font family for each theme */
     const themeVars = getComputedStyle(document.body);
     document.body.style.fontFamily = themeVars.getPropertyValue('--font-family') || 'Inter, sans-serif';
     currentTheme = idx;
+}}
+
+// Bootswatch theme logic
+const bootswatchThemes = [
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/cerulean/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/flatly/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/morph/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/quartz/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/sketchy/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/solar/bootstrap.min.css",
+    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/superhero/bootstrap.min.css"
+];
+function setBootswatchTheme(idx) {{
+    /* Remove Toodle theme */
+    document.getElementById('toodle-theme-style').setAttribute('disabled', '');
+    document.body.className = '';
+    document.body.style.fontFamily = '';
+    /* Enable Bootswatch theme */
+    const bootswatchLink = document.getElementById('bootswatch-theme-link');
+    bootswatchLink.removeAttribute('disabled');
+    bootswatchLink.href = bootswatchThemes[idx];
 }}
 </script>
 </body>
