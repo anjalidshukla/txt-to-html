@@ -62,39 +62,30 @@ def html_escape(text):
 
 def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
 
-    # Bootswatch/Bootstrap themes
-    bootswatch_themes = [
+    # Top 10 online CSS themes (Bootswatch + Material)
+    online_themes = [
         {"name": "Bootstrap Default", "cdn": "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"},
         {"name": "Cerulean", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/cerulean/bootstrap.min.css"},
         {"name": "Darkly", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css"},
         {"name": "Flatly", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/flatly/bootstrap.min.css"},
         {"name": "Lux", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css"},
-        {"name": "Morph", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/morph/bootstrap.min.css"},
-        {"name": "Quartz", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/quartz/bootstrap.min.css"},
-        {"name": "Sketchy", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/sketchy/bootstrap.min.css"},
+        {"name": "Materia", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/materia/bootstrap.min.css"},
+        {"name": "Pulse", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/pulse/bootstrap.min.css"},
+        {"name": "Sandstone", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/sandstone/bootstrap.min.css"},
         {"name": "Solar", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/solar/bootstrap.min.css"},
         {"name": "Superhero", "cdn": "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/superhero/bootstrap.min.css"},
     ]
 
-    # Toodle theme CSS
-    theme_vars = "".join([
-        f".theme-{i} {{\n" + "\n".join([f"  {k}: {v};" for k, v in t['vars'].items()]) + "\n}}\n"
-        for i, t in enumerate(THEMES)
-    ])
 
-    # Toodle theme buttons
-    theme_buttons = '<div class="toodle-theme-section"><button class="theme-toggle-main" disabled>TOODLE THEME</button>'
-    theme_buttons += "".join([
-        f'<button class="theme-toggle" onclick="setTheme({i})">{t["name"]}</button>' for i, t in enumerate(THEMES)
-    ])
-    theme_buttons += '</div>'
-
-    # Bootswatch theme buttons
-    bootswatch_buttons = '<div class="bootswatch-theme-section"><button class="theme-toggle-main" disabled>BOOTSWATCH</button>'
-    bootswatch_buttons += "".join([
-        f'<button class="theme-toggle" onclick="setBootswatchTheme({i})">{t["name"]}</button>' for i, t in enumerate(bootswatch_themes)
-    ])
-    bootswatch_buttons += '</div>'
+    # Theme dropdown button
+    theme_dropdown = '''<div class="theme-dropdown">
+      <button class="theme-main-btn" onclick="toggleThemeDropdown()">🎨 Theme</button>
+      <div id="theme-dropdown-list" class="theme-dropdown-list">
+        ''' + "".join([
+            f'<button class="theme-option-btn" onclick="setOnlineTheme({i})">{t["name"]}</button>' for i, t in enumerate(online_themes)
+        ]) + '''
+      </div>
+    </div>'''
 
     # Topic Name button with file links
     import glob
@@ -113,35 +104,17 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
     <title>{html_escape(batch_name)}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Quicksand:wght@700&family=Share+Tech+Mono&family=Montserrat:wght@700&family=Cinzel:wght@700&family=Baloo+2:wght@700&family=Maven+Pro:wght@700&family=Fredoka:wght@700&family=Dancing+Script:wght@700&family=Poppins:wght@700&family=Satisfy&family=Titillium+Web:wght@700&display=swap" rel="stylesheet">
-    <style id="toodle-theme-style">
-        :root {{ --bg-color: #1a1a40; --text-color: #f8f8ff; --primary-color: #ff00cc; --secondary-color: #00fff0; --card-bg: #23235b; --font-family: 'Orbitron', 'Inter', sans-serif; }}
-        {theme_vars}
-        body {{ background: var(--bg-color); color: var(--text-color); font-family: var(--font-family, 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif); min-height: 100vh; margin: 0; padding: 16px; transition: all 0.3s; }}
-        h1 {{ text-align: center; font-size: 2.2rem; font-weight: 800; margin: 12px 0 6px 0; font-family: var(--font-family, 'Inter', sans-serif); }}
-        .conversion-info {{ text-align: center; margin: 4px 0 12px 0; font-size: 0.95rem; opacity: 0.8; }}
-        .meta-info {{ background: var(--card-bg); border-radius: 10px; padding: 14px; margin: 8px auto 20px auto; max-width: 380px; text-align: center; font-size: 1rem; font-weight: 600; }}
-        .total-links {{ font-weight: 700; font-size: 1.1rem; }}
-        .controls {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 25px; }}
-        .toodle-theme-section, .bootswatch-theme-section {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }}
-        .theme-toggle-main {{ background: #fff; color: #232526; font-weight: 900; border: 2px solid #ff00cc; border-radius: 8px; padding: 10px 22px; font-size: 1.1rem; margin-right: 10px; letter-spacing: 2px; cursor: default; }}
-        .theme-toggle {{ padding: 10px 20px; background: var(--primary-color); border: none; border-radius: 8px; cursor: pointer; color: var(--text-color); font-size: 0.95rem; font-weight: 600; margin: 2px; font-family: var(--font-family, 'Inter', sans-serif); }}
-        .theme-toggle:active {{ transform: scale(0.97); }}
-        .topic-files-section {{ display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }}
-        .topic-name-main {{ background: #fff; color: #232526; font-weight: 900; border: 2px solid #00fff0; border-radius: 8px; padding: 10px 22px; font-size: 1.1rem; margin-right: 10px; letter-spacing: 2px; cursor: default; }}
-        .topic-file-link {{ background: var(--primary-color); color: var(--text-color); border-radius: 8px; padding: 8px 16px; text-decoration: none; font-weight: 700; font-size: 1rem; margin: 2px; font-family: var(--font-family, 'Inter', sans-serif); transition: background 0.2s; }}
-        .topic-file-link:hover {{ background: var(--secondary-color); color: #fff; }}
-        ul {{ list-style-type: none; padding: 0; margin: 0; }}
-        li {{ background: var(--card-bg); margin: 10px 0; padding: 14px 16px; border-radius: 10px; font-size: 1rem; display: flex; flex-direction: column; gap: 4px; font-family: var(--font-family, 'Inter', sans-serif); }}
-        a {{ color: var(--primary-color); text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
-        .pdf-title {{ color: #ff7043; }}
-        .video-title {{ color: #ff3d71; }}
-        .topic-title {{ color: var(--secondary-color); }}
+    <style>
+      .theme-dropdown {{ position: relative; display: inline-block; }}
+      .theme-main-btn {{ background: #fff; color: #232526; font-weight: 900; border: 2px solid #ff00cc; border-radius: 8px; padding: 10px 22px; font-size: 1.1rem; letter-spacing: 2px; cursor: pointer; }}
+      .theme-dropdown-list {{ display: none; position: absolute; left: 0; top: 110%; background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); z-index: 100; min-width: 220px; padding: 8px 0; }}
+      .theme-dropdown-list .theme-option-btn {{ display: block; width: 100%; background: none; border: none; text-align: left; padding: 10px 18px; font-size: 1rem; color: #232526; cursor: pointer; border-radius: 0; transition: background 0.2s; }}
+      .theme-dropdown-list .theme-option-btn:hover {{ background: #f0f0f0; }}
+      .controls {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 25px; }}
     </style>
-    <link id="bootswatch-theme-link" rel="stylesheet" href="" disabled>
+    <link id="online-theme-link" rel="stylesheet" href="" disabled>
 </head>
-<body class="theme-0">
+<body>
 <h1>{html_escape(batch_name)}</h1>
 <div class="conversion-info">
     <div><i class="fas fa-magic"></i> Converted by: {NAME}</div>
@@ -152,62 +125,53 @@ def make_html(batch_name, topics, pdfs, videos, total_links, date_str):
         <i class="fas fa-link"></i> Total links: {total_links}
     </div>
 </div>
-<div class="controls">{theme_buttons}{bootswatch_buttons}</div>
+<div class="controls">{theme_dropdown}</div>
 {topic_buttons}
-<h2>Topics & Links</h2>
-<ul>
-        {''.join([f'<li><span class="topic-title">{html_escape(t["title"])}:</span> {html_escape(t["desc"])} <a href="{t["url"]}" target="_blank">🔗 Link</a></li>' for t in topics])}
-</ul>
-<h2>PDFs</h2>
-<ul>
-        {''.join([f'<li><span class="pdf-title">{html_escape(p["title"])}:</span> <a href="{p["url"]}" target="_blank">📄 PDF</a></li>' for p in pdfs])}
-</ul>
-<h2>Videos</h2>
-<ul>
-        {''.join([f'<li><span class="video-title">{html_escape(v["title"])}:</span> <a href="{v["url"]}" target="_blank">🎬 Video</a></li>' for v in videos])}
-</ul>
+<div id="topics-section">
+{grouped_topics_html(topics)}
+</div>
 <script>
-// Toodle theme logic
-let currentTheme = 0;
-function setTheme(idx) {{
-    /* Remove Bootswatch theme if active */
-    const bootswatchLink = document.getElementById('bootswatch-theme-link');
-    bootswatchLink.setAttribute('disabled', '');
-    bootswatchLink.href = '';
-    document.getElementById('toodle-theme-style').removeAttribute('disabled');
-    document.body.className = 'theme-' + idx;
-    /* Set font family for each theme */
-    const themeVars = getComputedStyle(document.body);
-    document.body.style.fontFamily = themeVars.getPropertyValue('--font-family') || 'Inter, sans-serif';
-    currentTheme = idx;
+const onlineThemes = {str([t['cdn'] for t in online_themes])};
+function toggleThemeDropdown() {{
+  const list = document.getElementById('theme-dropdown-list');
+  list.style.display = (list.style.display === 'block') ? 'none' : 'block';
 }}
-
-// Bootswatch theme logic
-const bootswatchThemes = [
-    "https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/cerulean/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/darkly/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/flatly/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/morph/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/quartz/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/sketchy/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/solar/bootstrap.min.css",
-    "https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/superhero/bootstrap.min.css"
-];
-function setBootswatchTheme(idx) {{
-    /* Remove Toodle theme */
-    document.getElementById('toodle-theme-style').setAttribute('disabled', '');
-    document.body.className = '';
-    document.body.style.fontFamily = '';
-    /* Enable Bootswatch theme */
-    const bootswatchLink = document.getElementById('bootswatch-theme-link');
-    bootswatchLink.removeAttribute('disabled');
-    bootswatchLink.href = bootswatchThemes[idx];
+function setOnlineTheme(idx) {{
+  const link = document.getElementById('online-theme-link');
+  link.removeAttribute('disabled');
+  link.href = onlineThemes[idx];
+  document.body.className = '';
+  document.body.style.fontFamily = '';
+  document.getElementById('theme-dropdown-list').style.display = 'none';
 }}
+document.addEventListener('click', function(e) {{
+  const dropdown = document.querySelector('.theme-dropdown');
+  if (dropdown && !dropdown.contains(e.target)) {{
+    document.getElementById('theme-dropdown-list').style.display = 'none';
+  }}
+}});
 </script>
 </body>
 </html>'''
+    return html
+
+# Group topics by detected headings
+def grouped_topics_html(topics):
+    from collections import defaultdict
+    import re
+    topic_groups = defaultdict(list)
+    for t in topics:
+        # Extract topic heading (before first dash, pipe, or parenthesis)
+        m = re.match(r"([A-Za-z0-9 .&]+)", t['title'])
+        heading = m.group(1).strip() if m else t['title']
+        topic_groups[heading].append(t)
+    html = ''
+    for heading, items in topic_groups.items():
+        html += f'<h2>{html_escape(heading)}</h2><ul>'
+        for t in items:
+            html += f'<li>{html_escape(t["title"]) + ": " + html_escape(t["desc"])} <a href="{t["url"]}" target="_blank">🔗 Link</a></li>'
+        html += '</ul>'
+    return html
     return html
 
 
