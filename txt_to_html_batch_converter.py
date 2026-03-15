@@ -36,23 +36,31 @@ def html_escape(text):
                 .replace("'", '&#39;'))
 
 def make_html(batch_name, videos, pdfs, date_str, template):
-    # Insert video and pdf sections into template
     html = template
     # Replace title
     html = re.sub(r'<title>.*?</title>', f'<title>{html_escape(batch_name)}</title>', html)
     # Replace h1
     html = re.sub(r'<h1>.*?</h1>', f'<h1>{html_escape(batch_name)}</h1>', html)
-    # Replace date
-    html = re.sub(r'<div class="conversion-info">.*?<div><i class="fas fa-clock"></i>.*?</div>',
-                  f'<div class="conversion-info">\g<0>\n  <div><i class="fas fa-clock"></i> {html_escape(date_str)}</div>',
-                  html, flags=re.DOTALL)
-    # Replace video/pdf lists (simple, assumes one section each)
-    html = re.sub(r'(<h2>Videos</h2>\s*<ul>).*?(</ul>)',
-        r'\1' + ''.join([f'<li><span class="video-title">{html_escape(v["title"])}:</span> <a href="{v["url"]}" target="_blank">🎬 Video</a></li>' for v in videos]) + r'\2',
-        html, flags=re.DOTALL)
-    html = re.sub(r'(<h2>PDFs</h2>\s*<ul>).*?(</ul>)',
-        r'\1' + ''.join([f'<li><span class="pdf-title">{html_escape(p["title"])}:</span> <a href="{p["url"]}" target="_blank">📄 PDF</a></li>' for p in pdfs]) + r'\2',
-        html, flags=re.DOTALL)
+    # Replace date (append new date)
+    html = re.sub(r'(<div class="conversion-info">[\s\S]*?</div>)',
+                  r'\1\n  <div><i class="fas fa-clock"></i> ' + html_escape(date_str) + '</div>',
+                  html, count=1)
+
+    # Replace or insert Videos section
+    video_list = ''.join([f'<li><span class="video-title">{html_escape(v["title"])}:</span> <a href="{v["url"]}" target="_blank">🎬 Video</a></li>' for v in videos])
+    if re.search(r'<h2>Videos</h2>\s*<ul>[\s\S]*?</ul>', html):
+        html = re.sub(r'(<h2>Videos</h2>\s*<ul>)[\s\S]*?(</ul>)',
+            r'\1' + video_list + r'\2', html)
+    else:
+        html = re.sub(r'(</h1>)', r'\1\n<h2>Videos</h2>\n<ul>' + video_list + '</ul>', html, count=1)
+
+    # Replace or insert PDFs section
+    pdf_list = ''.join([f'<li><span class="pdf-title">{html_escape(p["title"])}:</span> <a href="{p["url"]}" target="_blank">📄 PDF</a></li>' for p in pdfs])
+    if re.search(r'<h2>PDFs</h2>\s*<ul>[\s\S]*?</ul>', html):
+        html = re.sub(r'(<h2>PDFs</h2>\s*<ul>)[\s\S]*?(</ul>)',
+            r'\1' + pdf_list + r'\2', html)
+    else:
+        html = re.sub(r'(</ul>)', r'\1\n<h2>PDFs</h2>\n<ul>' + pdf_list + '</ul>', html, count=1)
     return html
 
 def main():
